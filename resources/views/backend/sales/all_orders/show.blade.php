@@ -364,9 +364,9 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
                                     {{ 
-                                        $history->transferredBy->name ?? 'Admin' 
+                                        $history->transferredBy?->name ?? 'Admin' 
                                     }}
-                                    @if ($history->transferredBy->user_type == 'admin')
+                                    @if ($history->transferredBy?->user_type == 'admin')
                                         <span class="badge badge-info" style="width: 30%">Admin</span>
                                     @else
                                         <span class="badge badge-success" style="width: 25%">Shop</span>
