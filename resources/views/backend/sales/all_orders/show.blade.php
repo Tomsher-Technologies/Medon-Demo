@@ -386,6 +386,59 @@
 
     <div class="card">
         <div class="card-header">
+            <h1 class="h2 fs-16 mb-0">Order Tracking</h1>
+        </div>
+        <div class="card-body">
+            <div class="col-lg-12 table-responsive">
+                <table class="table table-bordered aiz-table invoice-summary">
+                    <thead>
+                        <tr class="bg-trans-dark">
+                            <th data-breakpoints="lg" class="min-col">#</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(!$order->tracking->isEmpty())
+                            @foreach ($order->tracking as $track)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>
+                                        @php
+                                            if($track->status == 'pending'){
+                                                $statusTrack = 'Order Pending';
+                                            }elseif ($track->status == 'confirmed') {
+                                                $statusTrack = 'Order Confirmed';
+                                            }elseif ($track->status == 'picked_up') {
+                                                $statusTrack = 'Order Picked Up';
+                                            }elseif ($track->status == 'partial_pick_up') {
+                                                $statusTrack = 'Order Partial Pick Up';
+                                            }elseif ($track->status == 'partial_delivery') {
+                                                $statusTrack = 'Order Partial Delivery';
+                                            }elseif ($track->status == 'delivered') {
+                                                $statusTrack = 'Order Delivered';
+                                            }elseif ($track->status == 'cancelled') {
+                                                $statusTrack = 'Order Cancelled';
+                                            }else{
+                                                $statusTrack = '';
+                                            }
+                                        @endphp
+                                        {{  $statusTrack  }}
+                                       
+                                    </td>
+                                  
+                                    <td>{{ \Carbon\Carbon::parse($track->status_date)->format('d M Y, h:i A') }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
             <h1 class="h2 fs-16 mb-0">Order Delivery Details</h1>
         </div>
         <div class="card-body">
@@ -588,14 +641,14 @@
             }, function(data) {
                 if(data == 0){
                     AIZ.plugins.notify('danger', 'Order already delivered');
-                    // setTimeout(function() {
-                    //     window.location.reload();
-                    // }, 3000);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
                 }else{
                     AIZ.plugins.notify('success', 'Delivery status has been updated');
-                    // setTimeout(function() {
-                    //     window.location.reload();
-                    // }, 3000);
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
                 }
             });
         });
