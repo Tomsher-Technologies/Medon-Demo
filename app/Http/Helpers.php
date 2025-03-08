@@ -1821,6 +1821,7 @@ function getActiveBuyXgetYOfferProducts(){
             print_r(['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()]);
             // return ['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()];
         }
+        die;
     }
 
     function getAccessToken()
