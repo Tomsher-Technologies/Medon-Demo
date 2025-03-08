@@ -714,6 +714,16 @@ class CheckoutController extends Controller
 
     public function successAppPayment(Request $request, NearestShopService $nearestShopService){
 
+        $order = Order::where('code','=',$request->order_id)->firstOrFail();
+        $userLatitude = json_decode($order->shipping_address)->latitude ??  '';
+        $userLongitude = json_decode($order->shipping_address)->longitude ??  '';
+
+        if($userLatitude != '' && $userLongitude != ''){
+            $nearestShopService->assignNearestShop($order, $userLatitude, $userLongitude, 10);
+        }
+
+die;
+
         $encResponse = $request->encResp;          //This is the response sent by the CCAvenue Server
         $rcvdString = decryptCC($encResponse,env('CCA_WORKING_KEY')); //Crypto Decryption used as per the specified working key.
         $order_status = $order_code = $tracking_id = "";
