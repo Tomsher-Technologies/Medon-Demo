@@ -49,9 +49,9 @@ class NearestShopService
         $data = $response->json();
         $nearestShop = null;
 
-        // echo '<pre>';
-        // print_r($data);
-        // die;
+        echo '<pre>';
+        print_r($data);
+        die;
         if(isset($data['rows'][0]['elements'])){
             $distances = $data['rows'][0]['elements'];
 
