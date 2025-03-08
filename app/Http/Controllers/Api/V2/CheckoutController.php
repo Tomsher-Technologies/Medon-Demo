@@ -27,6 +27,7 @@ use App\Mail\EmailManager;
 use App\Notifications\NewOrderNotification;
 use App\Notifications\OrderReturnRequest;
 use App\Notifications\OrderCancelRequest;
+use App\Services\NearestShopService;
 
 use Mail;
 class CheckoutController extends Controller
@@ -355,7 +356,7 @@ class CheckoutController extends Controller
                     Cart::where('user_id', $user_id)->delete();
 
                     NotificationUtility::sendOrderPlacedNotification($order);
-                    NotificationUtility::sendNotification($order, 'created');
+                    // NotificationUtility::sendNotification($order, 'created');
                     $message = getOrderStatusMessageTest($order->user->name, $order->code);
                     $userPhone = $order->user->phone ?? '';
                     if($userPhone != '' && $message['order_placed'] != ''){
@@ -371,6 +372,13 @@ class CheckoutController extends Controller
                     $admin->each(function ($admin) use ($order) {
                         $admin->notify(new NewOrderNotification($order));
                     });
+
+                    $userLatitude = json_decode($order->shipping_address)->latitude ??  '';
+                    $userLongitude = json_decode($order->shipping_address)->longitude ??  '';
+
+                    if($userLatitude != '' && $userLongitude != ''){
+                        $nearestShopService->assignNearestShop($order, $userLatitude, $userLongitude, 10);
+                    }
                 
                     return response()->json([
                         'status' => true,
@@ -496,12 +504,19 @@ class CheckoutController extends Controller
                         $order->order_success  = 1;
                         $order->save();
 
+                        $userLatitude = json_decode($order->shipping_address)->latitude ??  '';
+                        $userLongitude = json_decode($order->shipping_address)->longitude ??  '';
+
+                        if($userLatitude != '' && $userLongitude != ''){
+                            $nearestShopService->assignNearestShop($order, $userLatitude, $userLongitude, 10);
+                        }
+
                         $orderDetails = OrderDetail::where('order_id', $order->id)->update(['payment_status'=>'paid']);
 
                         reduceProductQuantity($productQuantities);
                         Cart::where('user_id', $user_id)->delete();
                         NotificationUtility::sendOrderPlacedNotification($order);
-                        NotificationUtility::sendNotification($order, 'created');
+                        // NotificationUtility::sendNotification($order, 'created');
                         $message = getOrderStatusMessageTest($order->user->name, $order->code);
                         $userPhone = $order->user->phone ?? '';
                         if($userPhone != '' && $message['order_placed'] != ''){
@@ -561,7 +576,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function successPayment(Request $request){
+    public function successPayment(Request $request, NearestShopService $nearestShopService){
         $encResponse = $request->encResp;          //This is the response sent by the CCAvenue Server
         $rcvdString = decryptCC($encResponse,env('CCA_WORKING_KEY')); //Crypto Decryption used as per the specified working key.
         $order_status = $order_code = $tracking_id = "";
@@ -588,6 +603,13 @@ class CheckoutController extends Controller
                 $order->date      = strtotime('now');
                 $order->save();
 
+                $userLatitude = json_decode($order->shipping_address)->latitude ??  '';
+                $userLongitude = json_decode($order->shipping_address)->longitude ??  '';
+
+                if($userLatitude != '' && $userLongitude != ''){
+                    $nearestShopService->assignNearestShop($order, $userLatitude, $userLongitude, 10);
+                }
+
                 $user_id = $order->user_id;
                 $walletDeduct = $order->wallet_deduction;
                 if($user_id && $walletDeduct > 0){
@@ -606,7 +628,7 @@ class CheckoutController extends Controller
                 Cart::where('user_id', $user_id)->delete();
 
                 NotificationUtility::sendOrderPlacedNotification($order);
-                NotificationUtility::sendNotification($order, 'created');
+                // NotificationUtility::sendNotification($order, 'created');
                 $message = getOrderStatusMessageTest($order->user->name, $order->code);
                 $userPhone = $order->user->phone ?? '';
                 if($userPhone != '' && $message['order_placed'] != ''){
@@ -690,7 +712,7 @@ class CheckoutController extends Controller
         return redirect(env('MEDON_PAYMENT_CANCEL').'?status='.$order_status.'&code='.$order_code);
     }
 
-    public function successAppPayment(Request $request){
+    public function successAppPayment(Request $request, NearestShopService $nearestShopService){
 
         $encResponse = $request->encResp;          //This is the response sent by the CCAvenue Server
         $rcvdString = decryptCC($encResponse,env('CCA_WORKING_KEY')); //Crypto Decryption used as per the specified working key.
@@ -715,6 +737,13 @@ class CheckoutController extends Controller
                 $order->date      = strtotime('now');
                 $order->save();
 
+                $userLatitude = json_decode($order->shipping_address)->latitude ??  '';
+                $userLongitude = json_decode($order->shipping_address)->longitude ??  '';
+
+                if($userLatitude != '' && $userLongitude != ''){
+                    $nearestShopService->assignNearestShop($order, $userLatitude, $userLongitude, 10);
+                }
+
                 $user_id = $order->user_id;
                 $walletDeduct = $order->wallet_deduction;
                 if($user_id && $walletDeduct > 0){
@@ -733,7 +762,7 @@ class CheckoutController extends Controller
                 Cart::where('user_id', $user_id)->delete();
 
                 NotificationUtility::sendOrderPlacedNotification($order);
-                NotificationUtility::sendNotification($order, 'created');
+                // NotificationUtility::sendNotification($order, 'created');
                 $message = getOrderStatusMessageTest($order->user->name, $order->code);
                 $userPhone = $order->user->phone ?? '';
                 if($userPhone != '' && $message['order_placed'] != ''){

@@ -14,6 +14,7 @@
 use App\Http\Controllers\Admin\AbandonedCartController;
 use App\Http\Controllers\Admin\App\AppBannerController;
 use App\Http\Controllers\Admin\App\AppHomeController;
+use App\Http\Controllers\Admin\DeviceTokenController;
 use App\Http\Controllers\Admin\App\SplashScreenController;
 use App\Http\Controllers\Admin\Auth\LoginController as AuthLoginController;
 use App\Http\Controllers\Admin\Delivery\DeliveryBoyController;
@@ -269,6 +270,9 @@ Route::group(['prefix' => env('ADMIN_PREFIX'), 'middleware' => ['auth', 'admin']
     Route::get('/roles/edit/{id}', [RoleController::class, 'edit'])->name('roles.edit');
     Route::get('/roles/destroy/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
+    Route::get('/push-notifications', [DeviceTokenController::class, 'notifications'])->name('notifications.list');
+    Route::post('/send/notification', [DeviceTokenController::class, 'sendNotification'])->name('send.notification');
+    
     Route::resource('staffs', StaffController::class);
     Route::get('/staffs/destroy/{id}', [StaffController::class, 'destroy'])->name('staffs.destroy');
 

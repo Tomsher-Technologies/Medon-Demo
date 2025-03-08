@@ -61,16 +61,12 @@
                                     <li class="list-group-item d-flex justify-content-between align-items- py-3">
                                         <div class="media text-inherit">
                                             <div class="media-body">
-                                                @if ($notification->type == 'App\Notifications\OrderNotification')
-                                                    <p class="mb-1 text-truncate-2">
-                                                        Order code: 
-                                                        {{ $notification->data['order_code'] }}
-                                                        {{ translate('has been ' . ucfirst(str_replace('_', ' ', $notification->data['status']))) }}
-                                                    </p>
-                                                    <small class="text-muted">
-                                                        {{ date('F j Y, g:i a', strtotime($notification->created_at)) }}
-                                                    </small>
-                                                @endif
+                                                <p class="mb-1 text-truncate-2">
+                                                    {{ $notification->data['message'] ?? '' }}
+                                                </p>
+                                                <small class="text-muted">
+                                                    {{ date('F j Y, g:i a', strtotime($notification->created_at)) }}
+                                                </small>
                                             </div>
                                         </div>
                                     </li>

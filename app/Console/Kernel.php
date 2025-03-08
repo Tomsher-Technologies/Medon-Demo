@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\DeleteOldSearchHistories::class,
+        Commands\SendReviewReminder::class,
     ];
 
     /**
@@ -27,8 +28,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         $schedule->command('queue:work --stop-when-empty')
-        ->everyMinute()
-        ->withoutOverlapping();
+                ->everyMinute()
+                ->withoutOverlapping();
+
+        $schedule->command('search-history:cleanup')->everyMinute();
+        $schedule->command('send:review-reminder')->everyMinute();
     }
 
     /**

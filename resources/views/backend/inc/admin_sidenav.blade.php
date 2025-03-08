@@ -130,7 +130,14 @@
                     </li>
                 @endif
 
-
+                {{-- @if (userHasPermision(33))
+                    <li class="aiz-side-nav-item">
+                        <a href="{{ route('notifications.list') }}" class="aiz-side-nav-link {{ areActiveRoutes(['notifications.list']) }}">
+                            <i class="las la-bell aiz-side-nav-icon"></i>
+                            <span class="aiz-side-nav-text">Push Notifications</span>
+                        </a>
+                    </li>
+                @endif --}}
 
                 <!-- Customers -->
                 @if (userHasPermision(8))
@@ -225,7 +232,7 @@
                     </li>
                 @endif
 
-                @if (userHasPermision(26))
+                @if (userHasPermision(34))
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('delivery_boy.index') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['delivery_boy.index', 'delivery_boy.create', 'delivery_boy.edit']) }}">
@@ -346,7 +353,7 @@
                     </li>
                 @endif
 
-                @if (userHasPermision(27))
+                @if (userHasPermision(32))
                     <li class="aiz-side-nav-item">
                         <a href="#"
                             class="aiz-side-nav-link {{ areActiveRoutes(['website.footer', 'website.header', 'banners.*']) }}">

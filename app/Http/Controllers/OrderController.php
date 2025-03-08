@@ -28,6 +28,7 @@ use App\Models\OrderTracking;
 use App\Models\RefundRequest;
 use App\Models\ShopNotifications;
 use App\Models\LiveLocations;
+use App\Models\ShopAssignHistory;
 use Auth;
 use Session;
 use DB;
@@ -140,8 +141,12 @@ class OrderController extends Controller
     public function all_orders_show($id)
     {
         $order = Order::findOrFail(decrypt($id));
+        // Fetch the shop assign history for the order
+        $assignHistories = ShopAssignHistory::with(['fromShop', 'toShop', 'transferredBy'])
+                                            ->where('order_id', $order->id)
+                                            ->get();
 
-        return view('backend.sales.all_orders.show', compact('order'));
+        return view('backend.sales.all_orders.show', compact('order','assignHistories'));
     }
 
     public function return_orders_show($id)
@@ -816,8 +821,30 @@ class OrderController extends Controller
             }
             
             //sends Notifications to user
-            NotificationUtility::sendNotification($order, $request->status);
+            // NotificationUtility::sendNotification($order, $request->status);
+
+            $statusTitle = [
+                'confirmed'         => "Order Confirmed",
+                'order_placed'      => "Order Placed",
+                'confirmed'         => "Order Confirmed",
+                'picked_up'         => "Order Out for Delivery",
+                'partial_pick_up'   => "Order Out for Delivery",
+                'cancelled'         => "Order Cancelled",
+                'partial_delivery'  => "Order Delivered",
+                'delivered'         => "Order Delivered",
+            ];
             $message = getOrderStatusMessageTest($order->user->name, $order->code);
+
+            $userDevice = $order->user->device_token ?? NULL;
+            // die;
+            if($userDevice != NULL && isset($message[$request->status]) && $message[$request->status] != ''){
+                $pushdata = [
+                    'device_token' => $userDevice,
+                    'title' => $statusTitle[$request->status] ?? 'Order Update',
+                    'body' => $message[$request->status]
+                ];
+                sendIndividualPushNotification($pushdata);
+            }
             $userPhone = $order->user->phone ?? '';
             
             if($userPhone != '' && isset($message[$request->status]) && $message[$request->status] != ''){
@@ -880,7 +907,7 @@ class OrderController extends Controller
         }
 
         //sends Notifications to user
-        NotificationUtility::sendNotification($order, $request->status);
+        // NotificationUtility::sendNotification($order, $request->status);
         if (get_setting('google_firebase') == 1 && $order->user->device_token != null) {
             $request->device_token = $order->user->device_token;
             $request->title = "Order updated !";
@@ -957,12 +984,32 @@ class OrderController extends Controller
     public function assign_shop_order(Request $request){
         $shop_id = $request->shop_id;
         $order_id = $request->order_id;
-
+        $reason = $request->has('reason') ? $request->reason : NULL;
         
         $order = Order::find($order_id);
+
+        $previous_shop = $order->shop_id;
+
         $order->shop_id = $shop_id;
         $order->shop_assigned_date = date('Y-m-d');
         $order->save();
+
+        if($previous_shop != NULL){
+            ShopAssignHistory::create([
+                'order_id' => $order->id,
+                'from_shop_id' => $previous_shop,
+                'to_shop_id' => $shop_id,
+                'reason' => $reason,
+                'transferred_by' => Auth::user()->id
+            ]);
+        }else{
+            ShopAssignHistory::create([
+                'order_id' => $order->id,
+                'from_shop_id' => NULL,
+                'to_shop_id' => $shop_id,
+                'transferred_by' => Auth::user()->id
+            ]);
+        }
 
         if( $shop_id != ''){
             //send notification to shop about the order
@@ -983,6 +1030,12 @@ class OrderController extends Controller
             $staffsNot->each(function ($staffsNot) use ($order) {
                 $staffsNot->notify(new NewOrderNotification($order));
             });
+        }
+
+        if(Auth::user()->shop_id != NULL){
+            return 1;
+        }else{
+            return 0;
         }
     }
 

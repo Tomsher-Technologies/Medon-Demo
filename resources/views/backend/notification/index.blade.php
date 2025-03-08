@@ -21,24 +21,18 @@
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
                         @forelse($notifications as $notification)
-                            @if($notification->type == 'App\Notifications\OrderNotification')
-                                <li class="list-group-item d-flex justify-content-between align-items- py-3">
-                                    <div class="media text-inherit">
-                                        <div class="media-body">
-                                            <p class="mb-1 text-truncate-2">
-                                                Order code: 
-                                                <a href="{{route('all_orders.show', encrypt($notification->data['order_id']))}}">
-                                                    {{$notification->data['order_code']}}
-                                                </a>
-                                                {{translate(' has been '. ucfirst(str_replace('_', ' ', $notification->data['status'])))}}
-                                            </p>
-                                            <small class="text-muted">
-                                                {{ date("F j Y, g:i a", strtotime($notification->created_at)) }}
-                                            </small>
-                                        </div>
+                            <li class="list-group-item d-flex justify-content-between align-items- py-3">
+                                <div class="media text-inherit">
+                                    <div class="media-body">
+                                        <p class="mb-1 text-truncate-2">
+                                            {{ $notification->data['message'] ?? '' }}
+                                        </p>
+                                        <small class="text-muted">
+                                            {{ date("F j Y, g:i a", strtotime($notification->created_at)) }}
+                                        </small>
                                     </div>
-                                </li>
-                            @endif
+                                </div>
+                            </li>
 
                         @empty
                             <li class="list-group-item">

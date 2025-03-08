@@ -1789,6 +1789,40 @@ function getActiveBuyXgetYOfferProducts(){
         // 
     }
 
+    function sendIndividualPushNotification($req){
+
+        $deviceToken = $req['device_token'];
+        // echo '<pre>';
+        // print_r($deviceTokens);
+        // die;
+      
+        $messages = [];
+        $client = new Client();
+        try {
+            $response = $client->post('https://fcm.googleapis.com/v1/projects/medonrider-e328c/messages:send', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . getAccessToken(),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'message' => [
+                        'token' => $deviceToken,
+                        'notification' => [
+                            'title' => $req['title'],
+                            'body' => $req['body'],
+                        ],
+                        'data' => [
+                            'key' => 'Value',
+                        ]
+                    ],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            print_r(['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()]);
+            // return ['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()];
+        }
+    }
+
     function getAccessToken()
     {
         $credentialsPath = storage_path('app/medonrider-e328c-firebase-adminsdk-zf60y-67e038ed77.json'); // Path to your service account file
