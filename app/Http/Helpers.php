@@ -1792,9 +1792,9 @@ function getActiveBuyXgetYOfferProducts(){
     function sendIndividualPushNotification($req){
 
         $deviceToken = $req['device_token'];
-        // echo '<pre>';
-        // print_r($deviceTokens);
-        // die;
+        echo '<pre>';
+        print_r($deviceTokens);
+        die;
       
         $messages = [];
         $client = new Client();
