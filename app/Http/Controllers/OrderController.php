@@ -140,7 +140,7 @@ class OrderController extends Controller
 
     public function all_orders_show($id)
     {
-        $order = Order::findOrFail(decrypt($id));
+        $order = Order::with('tracking')->findOrFail(decrypt($id));
         // Fetch the shop assign history for the order
         $assignHistories = ShopAssignHistory::with(['fromShop', 'toShop', 'transferredBy'])
                                             ->where('order_id', $order->id)
