@@ -228,6 +228,17 @@ class DeliveryBoyController extends Controller
                 $message = getOrderStatusMessageTest($order->user->name, $order->code);
                 $userPhone = $order->user->phone ?? '';
                 
+                $userDevice = $order->user->device_token ?? NULL;
+                // die;
+                if($userDevice != NULL && isset($message[$order->delivery_status]) && $message[$order->delivery_status] != ''){
+                    $pushdata = [
+                        'device_token' => $userDevice,
+                        'title' => $statusTitle[$order->delivery_status] ?? 'Order Update',
+                        'body' => $message[$order->delivery_status]
+                    ];
+                    sendIndividualPushNotification($pushdata);
+                }
+                
                 if($userPhone != '' && isset($message[$order->delivery_status]) && $message[$order->delivery_status] != ''){
                     SendSMSUtility::sendSMS($userPhone, $message[$order->delivery_status]);
                 }

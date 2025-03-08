@@ -252,11 +252,15 @@ class SearchController extends Controller
         //     $temp_user_id = getTempUserId();
         // }
 
-        Search::create([
-            'query' => $request->keyword,
-            'ip_address' => $request->ip(),
-            'user_id' => Auth::id(),
-            'temp_user_id' => Auth::check() ? null : getTempUserId(),
-        ]);
+        $keyword = trim($request->keyword); // or however you're getting the search term
+
+        if (strlen($keyword) >= 7) {
+            Search::create([
+                'query' => $request->keyword,
+                'ip_address' => $request->ip(),
+                'user_id' => Auth::id(),
+                'temp_user_id' => Auth::check() ? null : getTempUserId(),
+            ]);
+        }
     }
 }

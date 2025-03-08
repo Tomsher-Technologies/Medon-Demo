@@ -260,12 +260,14 @@
                                         @php
                                             if($order->shop_id != null){
                                                 $color = 'border:2px solid #09c309';
+                                                $showModal = 1;
                                             }else {
                                                 $color = 'border:2px solid red';
+                                                $showModal = 0;
                                             }
                                         @endphp
                                         @if($order->cancel_request == 0 || ($order->cancel_request == 1 && $order->cancel_approval == 2))
-                                            <select id="shop_id{{$key}}" name="shop_id{{$key}}" class="form-control selectShop" data-order="{{$order->id}}" style="{{$color}}">
+                                            <select id="shop_id{{$key}}" name="shop_id{{$key}}" class="form-control selectShop selectShopAssign"  data-status="{{ $showModal }}" data-order="{{$order->id}}" style="{{$color}}">
                                                 <option value="">Select Shop</option>
                                                 @foreach ($shops as $shop)
                                                     <option @if($shop->id == old('shop_id',$order->shop_id)) {{ 'selected' }} @endif value="{{$shop->id}}">{{ $shop->name }}</option>
@@ -309,6 +311,49 @@
 
         </div>
     </form>
+</div>
+
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferOrderModal" tabindex="-1" aria-labelledby="transferOrderModalLabel"
+aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="transferOrderForm">
+            @csrf
+            <input type="text" name="transfer_order_id" id="transfer_order_id" value="">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transferOrderModalLabel">Transfer Order to Another Shop</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Select Shop -->
+                    <div class="mb-3">
+                        <input type="text" name="to_shop_id" id="to_shop_id" class="form-select">
+                    </div>
+
+                    <!-- Reason -->
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Transfer</label>
+                        <textarea name="reason" id="reason" class="form-control" rows="3" placeholder="Enter reason"></textarea>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="transferError" class="alert alert-danger d-none"></div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="cancelButton" style="border-radius: 50px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitTransfer">
+                        <span id="submitTransferText">Transfer</span>
+                        <span id="submitTransferSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 @endsection
@@ -364,12 +409,30 @@
 @section('script')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
+        $('#cancelButton').on('click', function() {
+            location.reload(); // Reload the page
+        });
 
         $(document).on('change','.selectShop',function(){
             
             var shop_id = $(this).val();
             var order_id = $(this).attr('data-order');
+            var status = $(this).attr('data-status');
 
+            if (status == 1 && shop_id != '') {
+                $('#transfer_order_id').val(order_id);
+                $('#to_shop_id').val(shop_id);
+                $('#transferOrderModal').modal('show');
+            } else {
+                if (shop_id != ''){
+                    assignShop(order_id, shop_id, null);
+                }else{
+                    swal("Please select a shop!", { icon: "warning" });
+                }
+            }
+        });
+
+        function assignShop(order_id, shop_id, reason){
             swal({
                 title: "Are you sure?",
                 text: "",
@@ -379,31 +442,65 @@
             })
             .then((willDelete) => {
                 if (willDelete) {
+                    $('#submitTransfer').prop('disabled', true);
+                    $('#submitTransferSpinner').removeClass('d-none');
+                    $('#submitTransferText').text('Transferring...');
                     $.ajax({
                         url: "{{ route('assign-shop-order') }}",
                         type: "POST",
                         data: {
                             order_id: order_id,
-                            shop_id : $(this).val(),
+                            shop_id: shop_id,
+                            reason: reason,
                             _token: '{{ @csrf_token() }}',
                         },
                         dataType: "html",
-                        success: function() {
+                        success: function(response) {
                             swal("Successfully updated!", {
                                 icon: "success",
                             });
-                            window.location.reload();
+                            if(response == 1){
+                                setTimeout(function() {
+                                    window.location.href= '{{ route("all_orders.index") }}';
+                                }, 3000);
+                            }else{
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 3000);
+                            }
                         },
                         error: function(xhr, ajaxOptions, thrownError) {
+                            $('#submitTransfer').prop('disabled', false);
+                            $('#submitTransferSpinner').addClass('d-none');
+                            $('#submitTransferText').text('Transfer');
+
                             swal("Something went wrong!", {
                                 icon: "warning",
                             });
                         }
                     });
-                }else{
+                } else {
                     $(this).val('');
                 }
             });
+        }
+
+        $('#transferOrderForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var transfer_order_id = $('#transfer_order_id').val();
+            var to_shop_id = $('#to_shop_id').val();
+            var transfer_reason = $('#reason').val().trim();
+
+            if (transfer_reason === '') {
+                $('#transferError').removeClass('d-none').text('Please enter a reason for the transfer.');
+                return; // Stop the form from submitting
+            }
+
+          
+            $('#transferError').addClass('d-none').text('');
+            assignShop(transfer_order_id, to_shop_id, transfer_reason);
+
         });
 
         $(document).on("change", ".check-all", function() {

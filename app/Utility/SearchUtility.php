@@ -8,7 +8,7 @@ class SearchUtility
 {
     public static function store($query, $request)
     {
-        if ($query != null && $query != "") {
+        if ($query != null && $query != "" && strlen($query) >= 7) {
             $users_id = null;
             $users_id_type = 'user_id';
 

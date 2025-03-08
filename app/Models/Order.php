@@ -91,4 +91,9 @@ class Order extends Model
     {
         return $this->belongsTo(Shops::class, 'shop_id', 'id');
     }
+
+    public function assignHistories()
+    {
+        return $this->hasMany(ShopAssignHistory::class);
+    }
 }

@@ -16,16 +16,24 @@
                     $payment_status = $order->payment_status;
                     $shops = getActiveShops();
                 @endphp
-                
-                @if (($delivery_status == 'pending' || $delivery_status == 'confirmed') && Auth::user()->user_type != 'staff')
-                    @if($order->cancel_request == 0 || ($order->cancel_request == 1 && $order->cancel_approval == 2))
+
+                @php
+                    if ($order->shop_id != '') {
+                        $showModal = 1;
+                    } else {
+                        $showModal = 0;
+                    }
+                @endphp
+                                
+                @if ($delivery_status == 'pending' || $delivery_status == 'confirmed')
+                    @if ($order->cancel_request == 0 || ($order->cancel_request == 1 && $order->cancel_approval == 2))
                         <div class="col-md-4">
                             <label for="update_payment_status"><b>Assign Shop</b></label>
 
-                            <select id="shop_id" name="shop_id" class="form-control selectShopAssign" data-live-search="true"  data-order="{{$order->id}}">
-                                <option value="">Select Shop</option>
+                            <select id="shop_id" name="shop_id" class="form-control selectShopAssign" data-order="{{ $order->id }}" data-status="{{ $showModal }}">
+                                <option value="" class="disabled-option">Select Shop</option>
                                 @foreach ($shops as $shop)
-                                    <option @if($shop->id == old('shop_id',$order->shop_id)) {{ 'selected' }} @endif value="{{$shop->id}}">{{ $shop->name }}</option>
+                                    <option @if ($shop->id == old('shop_id', $order->shop_id)) {{ 'selected' }} @endif value="{{ $shop->id }}">{{ $shop->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -73,7 +81,9 @@
 
                 <div class="col-md-3 @if ($order->order_success == '2') d-none @endif">
                     <label for="update_estimated_date"><b>Estimated Delivery Date</b></label>
-                    <input type="text" class="form-control" id="update_estimated_date" value="{{ ($order->estimated_delivery != NULL) ? date('d-m-Y', strtotime($order->estimated_delivery)) : '' }}" {{ ($delivery_status == 'delivered' || $delivery_status == 'cancelled') ? 'disabled' : '' }}>
+                    <input type="text" class="form-control" id="update_estimated_date"
+                        value="{{ $order->estimated_delivery != null ? date('d-m-Y', strtotime($order->estimated_delivery)) : '' }}"
+                        {{ $delivery_status == 'delivered' || $delivery_status == 'cancelled' ? 'disabled' : '' }}>
                 </div>
 
                 <div class="col-md-3 d-none">
@@ -97,10 +107,10 @@
                         <br>
                         {{ json_decode($order->shipping_address)->country }}
                     </address>
-                    <p><b>Order Notes : </b> {{$order->order_notes ?? ''}}</p>
+                    <p><b>Order Notes : </b> {{ $order->order_notes ?? '' }}</p>
                      @php
                         $shopname = 'Not Assigned';
-                        if($order->shop_id != null){
+                        if ($order->shop_id != null) {
                             $shopname = $order->shop->name;
                         }
                     @endphp
@@ -333,6 +343,49 @@
 
     <div class="card">
         <div class="card-header">
+            <h1 class="h2 fs-16 mb-0">Shop Assign Details</h1>
+        </div>
+        <div class="card-body">
+            <div class="col-lg-12 table-responsive">
+                <table class="table table-bordered aiz-table invoice-summary">
+                    <thead>
+                        <tr class="bg-trans-dark">
+                            <th data-breakpoints="lg" class="min-col">#</th>
+                            <th>Assigned By</th>
+                            <th>From Shop</th>
+                            <th>To Shop</th>
+                            <th>Reason</th>
+                            <th>Transfer Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($assignHistories as $history)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    {{ 
+                                        $history->transferredBy->name ?? 'Admin' 
+                                    }}
+                                    @if ($history->transferredBy->user_type == 'admin')
+                                        <span class="badge badge-info" style="width: 30%">Admin</span>
+                                    @else
+                                        <span class="badge badge-success" style="width: 25%">Shop</span>
+                                    @endif
+                                </td>
+                                <td>{{ $history->fromShop ? $history->fromShop->name : 'N/A' }}</td>
+                                <td>{{ $history->toShop->name }}</td>
+                                <td>{{ $history->reason }}</td>
+                                <td>{{ $history->created_at->format('d-m-Y H:i a') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
             <h1 class="h2 fs-16 mb-0">Order Delivery Details</h1>
         </div>
         <div class="card-body">
@@ -395,6 +448,50 @@
             </div>
         </div>
     </div>
+
+      <!-- Transfer Modal -->
+      <div class="modal fade" id="transferOrderModal" tabindex="-1" aria-labelledby="transferOrderModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+          <form id="transferOrderForm">
+              @csrf
+              <input type="hidden" name="transfer_order_id" id="transfer_order_id" value="{{ $order->id }}">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="transferOrderModalLabel">Transfer Order to Another Shop</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  <div class="modal-body">
+
+                      <!-- Select Shop -->
+                      <div class="mb-3">
+                          <input type="hidden" name="to_shop_id" id="to_shop_id" class="form-select">
+                      </div>
+
+                      <!-- Reason -->
+                      <div class="mb-3">
+                          <label for="reason" class="form-label">Reason for Transfer</label>
+                          <textarea name="reason" id="reason" class="form-control" rows="3" placeholder="Enter reason"></textarea>
+                      </div>
+
+                      <!-- Error Message -->
+                      <div id="transferError" class="alert alert-danger d-none"></div>
+
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-danger" id="cancelButton" style="border-radius: 50px;">Cancel</button>
+                      <button type="submit" class="btn btn-primary" id="submitTransfer">
+                          <span id="submitTransferText">Transfer</span>
+                          <span id="submitTransferSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                      </button>
+                  </div>
+              </div>
+          </form>
+      </div>
+  </div>
+
     
 @endsection
 
@@ -405,6 +502,12 @@
         padding: 0;
         list-style: none;
     }
+
+    .selectShopAssign .disabled-option {
+            pointer-events: none; /* Prevent clicking on this option */
+            color: #ccc; /* Change the color to look visually disabled */
+        }
+
     .status {
         &.completed:before {
             background-color: #03ff0338;
@@ -490,6 +593,9 @@
                     }, 3000);
                 }else{
                     AIZ.plugins.notify('success', 'Delivery status has been updated');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 3000);
                 }
             });
         });
@@ -503,6 +609,9 @@
                 status: status
             }, function(data) {
                 AIZ.plugins.notify('success', 'Payment status has been updated');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 3000);
             });
         });
 
@@ -525,6 +634,9 @@
                         deliveryDate: deliveryDate
                     }, function(data) {
                         AIZ.plugins.notify('success', 'Estimated delivery date has been updated');
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 3000);
                     });
                 }else{
                     window.location.reload();
@@ -546,13 +658,53 @@
                 tracking_code: tracking_code
             }, function(data) {
                 AIZ.plugins.notify('success', 'Order tracking code has been updated');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 3000);
             });
         });
+
+        $('#cancelButton').on('click', function() {
+            location.reload(); // Reload the page
+        });
         
-        $(document).on('change','.selectShopAssign',function(){ 
+        $(document).on('change', '.selectShopAssign', function() {
             var shop_id = $(this).val();
             var order_id = $(this).attr('data-order');
+            var status = $(this).attr('data-status');
+            
+            if (status == 1 && shop_id != '') {
+                $('#to_shop_id').val(shop_id);
+                $('#transferOrderModal').modal('show');
+            } else {
+                if (shop_id != ''){
+                    assignShop(order_id, shop_id, null);
+                }else{
+                    swal("Please select a shop!", { icon: "warning" });
+                }
+            }
+        });
 
+        $('#transferOrderForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var transfer_order_id = $('#transfer_order_id').val();
+            var to_shop_id = $('#to_shop_id').val();
+            var transfer_reason = $('#reason').val().trim();
+
+            if (transfer_reason === '') {
+                $('#transferError').removeClass('d-none').text('Please enter a reason for the transfer.');
+                return; // Stop the form from submitting
+            }
+
+          
+            $('#transferError').addClass('d-none').text('');
+            assignShop(transfer_order_id, to_shop_id, transfer_reason);
+
+        });
+
+
+        function assignShop(order_id, shop_id, reason){
             swal({
                 title: "Are you sure?",
                 text: "",
@@ -562,31 +714,47 @@
             })
             .then((willDelete) => {
                 if (willDelete) {
+                    $('#submitTransfer').prop('disabled', true);
+                    $('#submitTransferSpinner').removeClass('d-none');
+                    $('#submitTransferText').text('Transferring...');
                     $.ajax({
                         url: "{{ route('assign-shop-order') }}",
                         type: "POST",
                         data: {
                             order_id: order_id,
-                            shop_id : shop_id,
+                            shop_id: shop_id,
+                            reason: reason,
                             _token: '{{ @csrf_token() }}',
                         },
                         dataType: "html",
-                        success: function() {
+                        success: function(response) {
                             swal("Successfully updated!", {
                                 icon: "success",
                             });
-                            window.location.reload();
+                            if(response == 1){
+                                setTimeout(function() {
+                                    window.location.href= '{{ route("all_orders.index") }}';
+                                }, 3000);
+                            }else{
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 3000);
+                            }
                         },
                         error: function(xhr, ajaxOptions, thrownError) {
+                            $('#submitTransfer').prop('disabled', false);
+                            $('#submitTransferSpinner').addClass('d-none');
+                            $('#submitTransferText').text('Transfer');
+
                             swal("Something went wrong!", {
                                 icon: "warning",
                             });
                         }
                     });
-                }else{
+                } else {
                     $(this).val('');
                 }
             });
-        });
+        }
     </script>
 @endsection

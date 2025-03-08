@@ -21,15 +21,25 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header row gutters-5">
-                    <div class="col text-center text-md-left">
+                    <div class="col-sm-3 text-center text-md-left">
                         <h5 class="mb-md-0 h6">Brands</h5>
                     </div>
-                    <div class="col-md-4">
-                        <form class="" id="sort_brands" action="" method="GET">
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" id="search"
-                                    name="search"@isset($sort_search) value="{{ $sort_search }}" @endisset
-                                    placeholder="Type name & Enter">
+                    <div class="col-sm-9">
+                        <form class="row" id="sort_brands" action="" method="GET">
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="search" name="search"@isset($sort_search) value="{{ $sort_search }}" @endisset placeholder="Type name & Enter">
+                            </div>
+                            
+                            <div class="col-sm-4">
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">Select Status</option>
+                                    <option value="1" @if ($status == '1') selected @endif>Active</option>
+                                    <option value="2" @if ($status == '0') selected @endif>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-warning" type="submit">Filter</button>
+                                <a href="{{ route('brands.index') }}" class="btn btn-info">Reset</a>
                             </div>
                         </form>
                     </div>
