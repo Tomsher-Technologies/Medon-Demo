@@ -319,7 +319,7 @@ aria-hidden="true">
     <div class="modal-dialog">
         <form id="transferOrderForm">
             @csrf
-            <input type="text" name="transfer_order_id" id="transfer_order_id" value="">
+            <input type="hidden" name="transfer_order_id" id="transfer_order_id" value="">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="transferOrderModalLabel">Transfer Order to Another Shop</h5>
@@ -331,7 +331,7 @@ aria-hidden="true">
 
                     <!-- Select Shop -->
                     <div class="mb-3">
-                        <input type="text" name="to_shop_id" id="to_shop_id" class="form-select">
+                        <input type="hidden" name="to_shop_id" id="to_shop_id" class="form-select">
                     </div>
 
                     <!-- Reason -->
