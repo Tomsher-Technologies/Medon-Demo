@@ -97,7 +97,7 @@ class Order extends Model
         return $this->hasMany(ShopAssignHistory::class);
     }
 
-    public function tracking(): HasMany
+    public function tracking()
     {
         return $this->hasMany(OrderTracking::class, 'order_id');
     }
