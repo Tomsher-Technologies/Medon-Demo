@@ -588,14 +588,14 @@
             }, function(data) {
                 if(data == 0){
                     AIZ.plugins.notify('danger', 'Order already delivered');
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 3000);
+                    // setTimeout(function() {
+                    //     window.location.reload();
+                    // }, 3000);
                 }else{
                     AIZ.plugins.notify('success', 'Delivery status has been updated');
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 3000);
+                    // setTimeout(function() {
+                    //     window.location.reload();
+                    // }, 3000);
                 }
             });
         });
