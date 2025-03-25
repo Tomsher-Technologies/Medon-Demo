@@ -106,10 +106,10 @@
                         </span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-animated dropdown-menu-md">
-                        <a href="{{ route('profile.index') }}" class="dropdown-item">
+                        {{-- <a href="{{ route('profile.index') }}" class="dropdown-item">
                             <i class="las la-user-circle"></i>
                             <span>Profile</span>
-                        </a>
+                        </a> --}}
 
                         <a href="{{ route('admin.logout') }}" class="dropdown-item">
                             <i class="las la-sign-out-alt"></i>
