@@ -49,7 +49,7 @@
     <div class="card">
         <form class="" id="sort_products" action="" method="GET">
             <div class="card-header row gutters-5">
-                <div class="col">
+                <div class="col-md-2">
                     <h5 class="mb-md-0 h6">All Product</h5>
                 </div>
 
@@ -119,7 +119,8 @@
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-warning w-100" type="submit">Filter</button>
+                    <button class="btn btn-warning " type="submit">Filter</button>
+                    <a href="{{ route('products.all') }}" class="btn btn-info" >Reset</a>
                 </div>
             </div>
 
