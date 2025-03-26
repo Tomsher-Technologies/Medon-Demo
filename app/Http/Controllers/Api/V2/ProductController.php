@@ -59,7 +59,7 @@ class ProductController extends Controller
         $brand_slug = $request->brand_slug ? explode(',', $request->brand_slug)  : false;
 
         $offer_slug = $request->offer_slug ? explode(',', $request->offer_slug)  : false;
-// DB::enableQueryLog();
+            // DB::enableQueryLog();
         $product_query  = Product::wherePublished(1);
         
         $metaData = Page::where('type', 'product_listing')->select('image1','meta_title', 'meta_description', 'keywords', 'og_title', 'og_description', 'twitter_title', 'twitter_description', 'meta_image')->first();
