@@ -10,6 +10,7 @@ use App\Models\BusinessSetting;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Offers;
+use App\Models\Popup;
 use App\Models\RecentSearches;
 use App\Models\Frontend\Banner;
 use App\Models\Subscriber;
@@ -271,6 +272,23 @@ class CommonController extends Controller
         }
     }
 
+    public function homePopup(){
+        $popup =  Popup::latest()->first();
+        $data = [];
+        if($popup){
+            $data = [
+                'url_type'  => $popup->link_type,
+                'link_id'   => $popup->link_type == 'external' ? $popup->link : $popup->link_ref,
+                'image'     => ($popup->image != NULL) ? uploaded_asset($popup->image) : null,
+                'status'    => $popup->status
+            ];
+        }
+        return response()->json([
+            "status" => true,
+            "message" => 'Success',
+            "data" => $data
+        ]);
+    }
     public function homeAdBanners()
     {
         $all_banners = Banner::with(['mobileImage'])->where('status', true)->get();

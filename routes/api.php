@@ -125,6 +125,7 @@ Route::group(['prefix' => 'v2'], function () {
         Route::get('ad_banners', [CommonController::class, 'homeAdBanners']);
         Route::get('offers', [CommonController::class, 'homeOffers']);
         Route::get('offer-details', [CommonController::class, 'offerDetails']);
+        Route::get('popup', [CommonController::class, 'homePopup']);
     });
 
     Route::group(['prefix' => 'website'], function () {

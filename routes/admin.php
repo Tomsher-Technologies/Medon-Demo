@@ -266,6 +266,10 @@ Route::group(['prefix' => env('ADMIN_PREFIX'), 'middleware' => ['auth', 'admin']
         Route::resource('custom-pages', PageController::class);
         Route::get('/custom-pages/edit/{id}', [PageController::class, 'edit'])->name('custom-pages.edit');
         Route::get('/custom-pages/destroy/{id}', [PageController::class, 'destroy'])->name('custom-pages.destroy');
+
+        Route::get('/popup', [WebsiteController::class, 'popup'])->name('popup.index');
+        Route::post('/popup-update', [WebsiteController::class, 'popupUpdate'])->name('popup.update');
+
     });
 
     Route::resource('roles', RoleController::class);
