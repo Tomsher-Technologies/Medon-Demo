@@ -84,6 +84,8 @@ Route::get('/export-top-selling-report', [AdminController::class, 'exportTopSell
 
 Route::get('/', [AuthLoginController::class, 'adminLoginView'])->name('home');
 
+Route::get('order-invoice/{id}', [InvoiceController::class, 'invoice_download'])->name('order.invoice');
+
 Route::group(['prefix' => env('ADMIN_PREFIX'), 'middleware' => ['guest']], function () {
     Route::get('login', [AuthLoginController::class, 'adminLoginView'])->name('admin.login');
     Route::post('login', [AuthLoginController::class, 'login']);

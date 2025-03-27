@@ -38,8 +38,8 @@
                         <div class="form-group row">
                             <label class="col-md-3 col-form-label">Phone number</label>
                             <div class="col-md-9">
-                                <input type="text" placeholder="Phone number" class="form-control"
-                                    value="{{ $customer->phone }}" name="phone">
+                                <input type="tel" maxlength="15" placeholder="Phone number" class="form-control"
+                                    value="{{ $customer->phone }}" name="phone" id="phone">
                             </div>
                         </div>
 
@@ -314,6 +314,14 @@
     </div>
 
     <script type="text/javascript">
+
+    const phoneInput = document.getElementById('phone');
+
+    phoneInput.addEventListener('input', () => {
+        phoneInput.value = phoneInput.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    });
+
+
         function add_new_address() {
             $('#new-address-modal').modal('show');
         }

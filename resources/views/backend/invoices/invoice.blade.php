@@ -248,7 +248,11 @@
         <div class="invoice-total">
             <p><strong>Subtotal:</strong> {{ single_price($order->orderDetails->sum('price')) }}</p>
             <p><strong>Tax:</strong> {{ single_price($order->orderDetails->sum('tax')) }}</p>
-            <p><strong>Discount:</strong> {{ single_price($order->coupon_discount) }}</p>
+            <p><strong>Discount:</strong> {{ single_price($order->offer_discount) }}</p>
+            @if ($order->coupon_discount)
+                <p><strong>Coupon Discount:</strong> {{ single_price($order->coupon_discount) }}</p>
+                <p><strong>Coupon Code:</strong> {{ single_price($order->coupon_code) }}</p>
+            @endif
             <p><strong>Shipping Charge:</strong> {{ single_price($order->shipping_cost) }}</p>
             <p><strong>Grand Total:</strong> {{ single_price($order->grand_total) }}</p>
         </div>
