@@ -458,7 +458,7 @@ class ProductController extends Controller
 
         try {
             $ext = $imageUrl->getClientOriginalExtension();
-            $path = 'products/' . Carbon::now()->year . '/' . Carbon::now()->format('m') . '/' . $sku . '/';
+            $path = 'products/' . $sku . '/';
 
             if ($mainImage) {
                 $filename = $path . $sku . '.' . $ext;

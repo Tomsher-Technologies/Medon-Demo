@@ -16,7 +16,7 @@
             </div>
             <br>
             <div class="">
-                <a href="{{ static_asset('download/product_bulk_demo.xlsx') }}" download><button class="btn btn-info">{{ translate('Download CSV')}}</button></a>
+                <a href="{{ static_asset('download/product_bulk_demo.xlsx') }}" download><button class="btn btn-info">{{ translate('Download Sample File')}}</button></a>
             </div>
             {{-- <div class="alert" style="color: #004085;background-color: #cce5ff;border-color: #b8daff;margin-bottom:0;margin-top:10px;">
                 <strong>{{translate('Step 2')}}:</strong>
@@ -50,7 +50,7 @@
                     </div>
                 </div>
                 <div class="form-group mb-0">
-                    <button type="submit" class="btn btn-info">{{translate('Upload CSV')}}</button>
+                    <button type="submit" class="btn btn-info">{{translate('Upload Excel')}}</button>
                 </div>
             </form>
         </div>
