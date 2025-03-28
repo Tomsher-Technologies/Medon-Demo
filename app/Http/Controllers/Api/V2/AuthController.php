@@ -140,6 +140,7 @@ class AuthController extends Controller
     public function verify_otp(Request $request)
     {
         if ($request->user_id && $request->otp) {
+            $device_token = $request->has('device_token') ? $request->device_token : NULL ;
             $user = User::findOrFail($request->user_id);
 
             if (Carbon::now()->gt($user->verification_code_expiry)) {
@@ -160,7 +161,7 @@ class AuthController extends Controller
 
             $user->verification_code_expiry = null;
             $user->verification_code = null;
-
+            $user->device_token = $device_token;
             $user->save();
 
             return $this->loginSuccess($user);
