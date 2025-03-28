@@ -293,6 +293,14 @@
                                 {{ single_price($order->shipping_cost) }}
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <strong class="text-muted">Discount :</strong>
+                            </td>
+                            <td>
+                                {{ single_price($order->offer_discount) }}
+                            </td>
+                        </tr>
                         @if ($order->coupon_discount)
                             <tr>
                                 <td>

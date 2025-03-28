@@ -27,6 +27,7 @@ use Image;
 use Storage;
 use Str;
 use File;
+use DB;
 
 class ProductController extends Controller
 {
@@ -39,9 +40,9 @@ class ProductController extends Controller
         $query = null;
         $seller_id = null;
         $sort_search = null;
-      
+       
         $category = ($request->has('category')) ? $request->category : '';
-        $products = Product::orderBy('created_at', 'desc');
+        $products = Product::query();
         if ($request->search != null) {
             $sort_search = $request->search;
             $products = $products
@@ -55,12 +56,14 @@ class ProductController extends Controller
             $col_name = $var[0];
             $query = $var[1];
             if ($col_name == 'status') {
-                $products = $products->where('published', $query);
+                $products = $products->where('published', $query)->orderBy('created_at', 'desc');
             } else {
                 $products = $products->orderBy($col_name, $query);
             }
 
             $sort_type = $request->type;
+        }else{
+            $products->orderBy('created_at', 'desc');
         }
 
         if ($request->has('category') && $request->category !== '0') {
@@ -455,7 +458,7 @@ class ProductController extends Controller
 
         try {
             $ext = $imageUrl->getClientOriginalExtension();
-            $path = 'products/' . Carbon::now()->year . '/' . Carbon::now()->format('m') . '/' . $sku . '/';
+            $path = 'products/' . $sku . '/';
 
             if ($mainImage) {
                 $filename = $path . $sku . '.' . $ext;

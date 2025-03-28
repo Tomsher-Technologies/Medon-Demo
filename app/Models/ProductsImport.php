@@ -39,6 +39,7 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation, To
     {
         // echo '<pre>';
         // print_r($rows);
+        // die;
         $brands = Brand::all();
         $categories = Category::all();
         foreach ($rows as $row) {
@@ -254,7 +255,7 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation, To
                     'product_id' => $productId->id,
                     'sku' => $sku,
                 ], [
-                    'qty' => (isset($row['quantity']) && $row['quantity'] !== NULL) ? $row['quantity'] : 2,
+                    'qty' => (isset($row['quantity']) && $row['quantity'] !== NULL) ? $row['quantity'] : 0,
                     'price' => $row['price'] ?? 1,
                     'variant' => '',
                 ]);
@@ -347,7 +348,7 @@ class ProductsImport implements ToCollection, WithHeadingRow, WithValidation, To
 
         try {
             $ext = substr($imageUrl, strrpos($imageUrl, '.') + 1);
-            $path = 'products/' . $this->year . '/' . $this->month . '/' . $sku . '/';
+            $path = 'products/' . $sku . '/';
 
             if ($mainImage) {
                 $filename = $path . $sku . '.' . $ext;

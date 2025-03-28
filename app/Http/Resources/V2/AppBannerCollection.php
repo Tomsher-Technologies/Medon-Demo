@@ -12,7 +12,7 @@ class AppBannerCollection extends ResourceCollection
             'data' => $this->collection->map(function ($data) {
                 $url = $data->link_type == 'external' ? $data->link : $data->link_ref_id;
                 return [
-                    'image' => storage_asset($data->mainImage->file_name),
+                    'image' => storage_asset($data->mainImage->file_name ?? ''),
                     'url_type' => $data->link_type,
                     'link_id' => $url,
                     'position' => $data->sort_order

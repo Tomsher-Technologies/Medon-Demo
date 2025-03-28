@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\HeaderMenus;
+use App\Models\Popup;
 use App\Models\Prescriptions;
 use App\Models\Frontend\HomeSlider;
 use Cache;
@@ -14,6 +15,39 @@ use Illuminate\Http\Request;
 
 class WebsiteController extends Controller
 {
+
+	public function popup(){
+		$popup =  Popup::latest()->first();
+		
+		return view('backend.app.popup', compact('popup'));
+	}
+
+	public function popupUpdate(Request $request){
+		$request->validate([
+            'image' => 'required',
+            'link_type' => 'required',
+            'status' => 'required',
+            'link' => 'nullable|required_if:link_type,external',
+            'link_ref_id' => 'nullable|required_if:link_type,product,category',
+        ], [
+            'link.required_if' => "Please enter a valid link",
+            'link_ref_id.required_if' => "Please enter an option",
+        ]);
+
+		
+		$popup = Popup::find($request->popup_id);
+
+		$popup->image = $request->image;
+		$popup->link_type = $request->link_type;
+		$popup->link_ref = $request->link_ref_id;
+		$popup->link = $request->link;
+		$popup->status = $request->status;
+		$popup->save();
+	
+
+        flash(translate('Popup content updated successfully'))->success();
+        return redirect()->route('popup.index');
+	}
 	public function header(Request $request)
 	{
 		$menus = HeaderMenus::orderBy('id','asc')->get();

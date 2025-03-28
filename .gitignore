@@ -33,3 +33,10 @@ install.zip
 *.zip
 public/tempuploads/*
 public/temp-images/*
+/storage/framework/*
+/storage/framework/cache/*
+/storage/framework/cache/data/*
+/storage/logs/*
+/storage/framework/cache/data/
+storage/framework/cache/data/
+/storage/framework/sessions/

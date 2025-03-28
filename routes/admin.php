@@ -84,6 +84,8 @@ Route::get('/export-top-selling-report', [AdminController::class, 'exportTopSell
 
 Route::get('/', [AuthLoginController::class, 'adminLoginView'])->name('home');
 
+Route::get('order-invoice/{id}', [InvoiceController::class, 'invoice_download'])->name('order.invoice');
+
 Route::group(['prefix' => env('ADMIN_PREFIX'), 'middleware' => ['guest']], function () {
     Route::get('login', [AuthLoginController::class, 'adminLoginView'])->name('admin.login');
     Route::post('login', [AuthLoginController::class, 'login']);
@@ -264,6 +266,10 @@ Route::group(['prefix' => env('ADMIN_PREFIX'), 'middleware' => ['auth', 'admin']
         Route::resource('custom-pages', PageController::class);
         Route::get('/custom-pages/edit/{id}', [PageController::class, 'edit'])->name('custom-pages.edit');
         Route::get('/custom-pages/destroy/{id}', [PageController::class, 'destroy'])->name('custom-pages.destroy');
+
+        Route::get('/popup', [WebsiteController::class, 'popup'])->name('popup.index');
+        Route::post('/popup-update', [WebsiteController::class, 'popupUpdate'])->name('popup.update');
+
     });
 
     Route::resource('roles', RoleController::class);

@@ -274,7 +274,7 @@ class ProfileController extends Controller
             $offset = $request->offset ? $request->offset : 0;
             // $date = $request->date;
 
-            $orders = Order::select('id','code','delivery_status','payment_type','coupon_code','grand_total','created_at','order_success')->where('order_success', 1)->orderBy('id', 'desc')->where('user_id',$user_id);
+            $orders = Order::select('id','code','delivery_status','payment_type','coupon_code','grand_total','created_at','order_success','cancel_reason')->where('order_success', 1)->orderBy('id', 'desc')->where('user_id',$user_id);
             if ($request->has('search')) {
                 $sort_search = $request->search;
                 $orders = $orders->where('code', 'like', '%' . $sort_search . '%');
@@ -333,6 +333,7 @@ class ProfileController extends Controller
                 $details['date']                    = date('d-m-Y h:i A', $order->date);
                 $details['cancel_request']          = $order->cancel_request;
                 $details['cancel_approval']         = $order->cancel_approval;
+                $details['cancel_reason']           = $order->cancel_reason;
                 $details['estimated_delivery_date'] = ($order->delivery_status != 'delivered' && $order->delivery_status != 'cancelled' && $order->estimated_delivery != NULL && $order->estimated_delivery != '0000-00-00') ? date('d-m-Y', strtotime($order->estimated_delivery)) : '';
                 $details['products'] = [];
                 if($order->orderDetails){

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\V2;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use App\Models\Review;
 
 class ProductFilterCollection extends ResourceCollection
 {
@@ -30,7 +31,9 @@ class ProductFilterCollection extends ResourceCollection
                 'slug' => $data->slug,
                 'offer_tag' => $priceData['offer_tag'],
                 'return_refund' => $data->return_refund,
-                'published' => $data->published
+                'published' => $data->published,
+                'rating' => (float)$data->rating,
+                'rating_count' => (int)Review::where(['product_id' => $data->id])->count(),
             ];
         });
     }
